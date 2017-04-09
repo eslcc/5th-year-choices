@@ -1,5 +1,5 @@
 # 5th Year Subject Choices
-## [![an eslcc project](https://img.shields.io/badge/eslcc-project-orange.svg)](https://eslcc.club)
+## [![an eslcc project](https://img.shields.io/badge/eslcc-project-orange.svg?style=flat-square)](https://eslcc.club)
 
 This is a webapp to help students of the European School of Luxembourg 1 to make their subject choices. It does this
 by showing them which combinations of choices are possible, warning them if they don't follow the guidelines, and allowing
