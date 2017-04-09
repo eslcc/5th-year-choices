@@ -432,6 +432,7 @@ const choices: Choices = {
         displayName: I18n.Choices.introEco,
         column: 5,
         periods: 2,
+        error: values => values.ecoY6 && I18n.Errors.introEco,
     },
     soc: {
         type: ChoiceFieldType.BOOLEAN,
