@@ -257,7 +257,7 @@ export class Errors {
         en: 'The total number of periods cannot be more than 35.'
     };
     static readonly hisGeoPhilo2p: I18nField = {
-        en: '2 period History; Geography and Philosophy are compulsory if not chosen as a 4 period course.'
+        en: '2 period History, Geography and Philosophy are compulsory if not chosen as a 4 period course.'
     };
     static readonly bio2p: I18nField = {
         en: '2 period Biology is compulsory unless Biology 4; Chemistry or Physics is chosen.'
