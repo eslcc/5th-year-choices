@@ -64,15 +64,57 @@ export interface ChoiceValues {
 
 export type ValueList = {[s: string]: I18nField};
 
+/**
+ * A single choice definition.
+ */
 export interface Choice {
+    /**
+     * The type of the choice option
+     */
     type: ChoiceFieldType;
+    /**
+     * The name to display in the browser. May be translated.
+     */
     displayName: I18nField;
+    /**
+     * The default value of the choice. If blank, assumes the default for the type
+     * (blank for select, empty string for input, false for boolean)
+     */
     default?: null | boolean | string | ValueList;
+    /**
+     * If the choice type is select, the options.
+     */
     options?: ValueList;
+    /**
+     * The column of the choice on the form.
+     */
     column?: number;
+    /**
+     * The number of periods of this subject.
+     * The period count is resolved as follows:
+     * 1. if `periods` is a number, use that.
+     * 2. if `periods` is an object and has a key named the same as the current value of the choice, use that.
+     * 3. use the `periods` object's `default` key.
+     */
     periods?: number | {[s: string]: number};
+    /**
+     * A callback that is called with all the current choices to determine if they are valid.
+     * @param choices the current choices by the user
+     * @returns falsey if the choice is valid, or an error to display and disable the field.
+     */
     error?: (choices: ChoiceValues) => I18nField | Falsey;
+    /**
+     * Whether to keep the input field enabled even if `error` returns truthy.
+     * Useful for resolving circularities (see geo2p/geo4p for an example).
+     */
     keepEnabledEvenIfErrored?: boolean;
+    /**
+     * A callback that is called with all the current choices to determine whether the user should be warned.
+     * Warnings are normally used for choices that are technically valid but dubious
+     * (for example, choosing ma4 in 4th/5th but ma5 in 6th/7th)
+     * @param choices the current choices by the user
+     * @returns falsey if the choice is valid, or a warning to display
+     */
     warning?: (choices: ChoiceValues) => I18nField | Falsey;
 }
 
