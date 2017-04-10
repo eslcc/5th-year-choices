@@ -368,6 +368,7 @@ const choices: Choices = {
         options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Languages}),
         column: 3,
         periods: {null: 0, default: 4},
+        default: null,
     },
     ecoY6: {
         type: ChoiceFieldType.BOOLEAN,
@@ -401,6 +402,7 @@ const choices: Choices = {
         column: 3,
         periods: {null: 0, default: 4},
         error: values => values.onlY6 ? I18n.Errors.l4AndOnl : null,
+        default: null,
     },
     onlY6: {
         type: ChoiceFieldType.SELECT,
@@ -412,7 +414,9 @@ const choices: Choices = {
                 ['ie', 'mt', 'sv', 'fi']
             )
         }),
+        column: 3,
         periods: {null: 0, default: 4},
+        default: null,
         error: values => values.l4Y6 ? I18n.Errors.l4AndOnl : null,
     },
     // endregion
