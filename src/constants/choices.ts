@@ -10,6 +10,8 @@ export enum ChoiceFieldType {
     BOOLEAN
 }
 
+export type ChoiceValueType = boolean | string | null;
+
 export type Falsey = false | null | undefined;
 
 export interface ChoiceValues {
@@ -71,7 +73,7 @@ export interface Choice {
     /**
      * The type of the choice option
      */
-    type: ChoiceFieldType;
+        type: ChoiceFieldType;
     /**
      * The name to display in the browser. May be translated.
      */
@@ -80,7 +82,7 @@ export interface Choice {
      * The default value of the choice. If blank, assumes the default for the type
      * (blank for select, empty string for input, false for boolean)
      */
-    default?: null | boolean | string | ValueList;
+        default?: null | boolean | string | ValueList;
     /**
      * If the choice type is select, the options.
      */
@@ -104,11 +106,6 @@ export interface Choice {
      */
     error?: (choices: ChoiceValues) => I18nField | Falsey;
     /**
-     * Whether to keep the input field enabled even if `error` returns truthy.
-     * Useful for resolving circularities (see geo2p/geo4p for an example).
-     */
-    keepEnabledEvenIfErrored?: boolean;
-    /**
      * A callback that is called with all the current choices to determine whether the user should be warned.
      * Warnings are normally used for choices that are technically valid but dubious
      * (for example, choosing ma4 in 4th/5th but ma5 in 6th/7th)
@@ -116,6 +113,10 @@ export interface Choice {
      * @returns falsey if the choice is valid, or a warning to display
      */
     warning?: (choices: ChoiceValues) => I18nField | Falsey;
+    /**
+     * This can be used to enable/disable the choice, whatever the return value of error.
+     */
+    overrideDisabled?: (choices: ChoiceValues) => boolean;
 }
 
 export type Choices = {[P in keyof ChoiceValues]: Choice};
@@ -123,7 +124,7 @@ export type Choices = {[P in keyof ChoiceValues]: Choice};
 
 // Remove this when typescript/typescript#6480 is closed
 // tslint:disable-next-line
-function gimpTypeSafetyBeVeryCarefulWithThis(thing: any): ValueList {
+function gimpTypeSafetyBeVeryCarefulWithThis<T>(thing: any): T {
     return thing;
 }
 
@@ -167,12 +168,12 @@ const choices: Choices = {
     l3: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l3,
-        options: gimpTypeSafetyBeVeryCarefulWithThis(I18n.Languages)
+        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>(I18n.Languages)
     },
     l4: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l4,
-        options: gimpTypeSafetyBeVeryCarefulWithThis({null: I18n.None.None, ...I18n.Languages})
+        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Languages})
     },
     onl: {
         type: ChoiceFieldType.SELECT,
@@ -194,7 +195,7 @@ const choices: Choices = {
     relY4: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.relY4,
-        options: gimpTypeSafetyBeVeryCarefulWithThis(I18n.Religions),
+        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>(I18n.Religions),
         error: values => values.relY4 === null && I18n.Errors.genericBlank,
     },
     ecoY4: {
@@ -215,10 +216,11 @@ const choices: Choices = {
     },
     // endregion
     // region Column 1
+
     relY6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.relChange,
-        options: gimpTypeSafetyBeVeryCarefulWithThis({null: I18n.None.None, ...I18n.Religions}),
+        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Religions}),
         periods: 1,
         column: 1,
     },
@@ -240,8 +242,16 @@ const choices: Choices = {
         displayName: I18n.Choices.his,
         column: 2,
         periods: 2,
-        error: values => values.his4p && I18n.Errors.hisGeoPhilo2p,
-        keepEnabledEvenIfErrored: true,
+        error: values => {
+            if (values.his4p) {
+                return I18n.Errors.generic2pNot4p;
+            }
+            if (!values.his2p) {
+                return I18n.Errors.hisGeoPhilo2p;
+            }
+            return null;
+        },
+        overrideDisabled: values => values.his4p,
         default: true
     },
     geo2p: {
@@ -249,8 +259,16 @@ const choices: Choices = {
         displayName: I18n.Choices.geo,
         column: 2,
         periods: 2,
-        error: values => values.geo4p && I18n.Errors.hisGeoPhilo2p,
-        keepEnabledEvenIfErrored: true,
+        error: values => {
+            if (values.geo4p) {
+                return I18n.Errors.generic2pNot4p;
+            }
+            if (!values.geo2p) {
+                return I18n.Errors.hisGeoPhilo2p;
+            }
+            return null;
+        },
+        overrideDisabled: values => values.geo4p,
         default: true
     },
     philo2p: {
@@ -258,8 +276,16 @@ const choices: Choices = {
         displayName: I18n.Choices.philo,
         column: 2,
         periods: 2,
-        error: values => values.philo4p && I18n.Errors.hisGeoPhilo2p,
-        keepEnabledEvenIfErrored: true,
+        error: values => {
+            if (values.philo4p) {
+                return I18n.Errors.generic2pNot4p;
+            }
+            if (!values.philo2p) {
+                return I18n.Errors.hisGeoPhilo2p;
+            }
+            return null;
+        },
+        overrideDisabled: values => values.philo4p,
         default: true
     },
     bio2p: {
@@ -267,8 +293,16 @@ const choices: Choices = {
         displayName: I18n.Choices.bio,
         column: 2,
         periods: 2,
-        error: values => I18n.Errors.bio2p,
-        keepEnabledEvenIfErrored: true,
+        error: values => {
+            if (values.bio4p) {
+                return I18n.Errors.generic2pNot4p;
+            }
+            if (!values.bio4p && !values.chi && !values.phy) {
+                return I18n.Errors.bio2p;
+            }
+            return null;
+        },
+        overrideDisabled: values => values.bio4p,
     },
     // endregion
     // region Column 3
@@ -289,48 +323,49 @@ const choices: Choices = {
         displayName: I18n.Choices.bio,
         column: 3,
         periods: 4,
-        error: values => values.bio2p && I18n.Errors.bio2p,
+        error: values => values.bio2p && I18n.Errors.generic2pNot4p,
     },
     art4p: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.art,
         column: 3,
         periods: 4,
-        error: values => values.art2p && I18n.Errors.artMus2p,
-        warning: values => !values.artY4 && I18n.Warnings.artMusNotY4,
+        error: values => values.art2p && I18n.Errors.generic2pNot4p,
+        warning: values => values.art4p && !values.artY4 && I18n.Warnings.artMusNotY4,
     },
     mus4p: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.mus,
         column: 3,
         periods: 4,
-        error: values => values.mus2p && I18n.Errors.artMus2p,
+        error: values => values.mus2p && I18n.Errors.generic2pNot4p,
+        warning: values => values.mus4p && !values.musY4 && I18n.Warnings.artMusNotY4,
     },
     his4p: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.his,
         column: 3,
         periods: 4,
-        error: values => values.his2p && I18n.Errors.hisGeoPhilo2p,
+        error: values => values.his2p && I18n.Errors.generic2pNot4p,
     },
     geo4p: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.geo,
         column: 3,
         periods: 4,
-        error: values => values.geo2p && I18n.Errors.hisGeoPhilo2p,
+        error: values => values.geo2p && I18n.Errors.generic2pNot4p,
     },
     philo4p: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.philo,
         column: 3,
         periods: 4,
-        error: values => values.philo2p && I18n.Errors.hisGeoPhilo2p,
+        error: values => values.philo2p && I18n.Errors.generic2pNot4p,
     },
     l3Y6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l3,
-        options: gimpTypeSafetyBeVeryCarefulWithThis({null: I18n.None.None, ...I18n.Languages}),
+        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Languages}),
         column: 3,
         periods: {null: 0, default: 4},
     },
@@ -362,7 +397,7 @@ const choices: Choices = {
     l4Y6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l4,
-        options: gimpTypeSafetyBeVeryCarefulWithThis({null: I18n.None.None, ...I18n.Languages}),
+        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Languages}),
         column: 3,
         periods: {null: 0, default: 4},
         error: values => values.onlY6 ? I18n.Errors.l4AndOnl : null,
@@ -370,7 +405,7 @@ const choices: Choices = {
     onlY6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.onl,
-        options: gimpTypeSafetyBeVeryCarefulWithThis({
+        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({
             null: I18n.None.None,
             ...pick(
                 I18n.Languages,
@@ -412,14 +447,14 @@ const choices: Choices = {
         displayName: I18n.Choices.art,
         column: 5,
         periods: 2,
-        error: values => values.art4p && I18n.Errors.artMus2p,
+        error: values => values.art4p && I18n.Errors.generic2pNot4p,
     },
     mus2p: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.mus,
         column: 5,
         periods: 2,
-        error: values => values.mus4p && I18n.Errors.artMus2p,
+        error: values => values.mus4p && I18n.Errors.generic2pNot4p,
     },
     ict: {
         type: ChoiceFieldType.BOOLEAN,
@@ -507,3 +542,11 @@ const choices: Choices = {
 };
 
 export default choices;
+
+export function buildChoiceDefaults(): ChoiceValues {
+    const result = {};
+    Object.keys(choices).forEach(key => {
+       result[key] = choices[key].default;
+    });
+    return gimpTypeSafetyBeVeryCarefulWithThis<ChoiceValues>(result);
+}

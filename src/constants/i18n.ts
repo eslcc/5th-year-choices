@@ -223,7 +223,7 @@ export class None {
 
 export class Warnings {
     static readonly artMusNotY4: I18nField = {
-        en: 'If Art or Music has not been followed in years 4 and 5 the pupil must provide satisfactory' +
+        en: 'If Art or Music has not been followed in years 4 and 5 the pupil must provide satisfactory ' +
         'evidence that s(he) is able to follow it at this level.'
     };
     static readonly ma5AfterMa4: I18nField = {
@@ -261,6 +261,9 @@ export class Errors {
     };
     static readonly bio2p: I18nField = {
         en: '2 period Biology is compulsory unless Biology 4; Chemistry or Physics is chosen.'
+    };
+    static readonly generic2pNot4p: I18nField = {
+        en: 'A 2 period subject cannot be chosen together with its 4 period counterpart.'
     };
     static readonly notEnoughCol3: I18nField = {
         en: 'At least 2 optional subjects must be chosen.'
@@ -307,8 +310,5 @@ export class Errors {
     };
     static readonly labOnlyOne: I18nField = {
         en: 'Only one laboratory subject can be chosen.'
-    };
-    static readonly artMus2p: I18nField = {
-        en: '2 period Art and Music can only be chosen if their 4 period counterparts are not chosen.'
     };
 }
