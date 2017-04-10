@@ -2,20 +2,33 @@ import * as React from 'react';
 import Checkbox from 'material-ui/Checkbox';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import TextField from 'material-ui/TextField';
 
-import {Choice as ChoiceInterface, ChoiceValues, ChoiceValueType, ChoiceFieldType, Falsey} from '../constants/choices';
+import {Choice as ChoiceInterface, ChoiceValues, ChoiceValueType, ChoiceFieldType, Falsey, getPeriodCount} from '../constants/choices';
 import {I18nField} from '../constants/i18n';
+import {AppState} from '../Store';
+import {Action} from './actions';
+import {connect} from 'react-redux';
+import * as actions from '../Choice/actions';
 
 interface ChoiceProps {
-    id: string;
-    item: ChoiceInterface;
-    values: ChoiceValues;
-    onChange: (key: string, newValue: ChoiceValueType) => void;
+    id?: string;
+    item?: ChoiceInterface;
+    values?: ChoiceValues;
+    onChange?: (key: string, newValue: ChoiceValueType) => void;
     periods?: number;
     error?: I18nField | Falsey;
     warning?: I18nField | Falsey;
     disabled?: boolean;
 }
+
+const mapStateToProps = (state: AppState): ChoiceProps => ({
+    values: state.choice.values
+});
+
+const mapDispatchToProps = (dispatch: (action: Action) => Action): ChoiceProps => ({
+    onChange: (key, value) => dispatch(actions.choiceChange(key, value)),
+});
 
 interface ChoiceState {
 
@@ -23,14 +36,14 @@ interface ChoiceState {
 
 class BooleanChoice extends React.Component<ChoiceProps, ChoiceState> {
     render() {
-        const {item, periods, error, warning, onChange, disabled, id} = this.props;
+        const {item, periods, error, warning, onChange, disabled, id, values} = this.props;
 
         return (
             <div className="choice">
                 <Checkbox
                     label={item.displayName.en}
                     disabled={disabled}
-                    defaultChecked={(item.default as boolean) || false}
+                    checked={values[id] || (item.default as boolean) || false}
                     onCheck={(evt, checked) => onChange(id, checked)}
                 />
                 {periods && (
@@ -48,8 +61,21 @@ class BooleanChoice extends React.Component<ChoiceProps, ChoiceState> {
 }
 
 class InputChoice extends React.Component<ChoiceProps, ChoiceState> {
+    onChange(evt: {}, newValue: string) {
+        this.props.onChange(this.props.id, newValue);
+    }
+
     render() {
-        return <div>fuck</div>;
+        const {item, id, values} = this.props;
+        return (
+            <div>
+                <TextField
+                    hintText={item.displayName.en}
+                    value={values[id]}
+                    onChange={this.onChange.bind(this)}
+                />
+            </div>
+        );
     }
 }
 
@@ -105,26 +131,7 @@ class Choice extends React.Component<ChoiceProps, {}> {
             warning = item.warning(values);
         }
 
-        let periods;
-        if (item.periods) {
-            switch (typeof item.periods) {
-                case 'number':
-                    periods = item.periods;
-                    break;
-                case 'object':
-                    let value = values[id];
-                    if (value || value == null) {
-                        if (item.periods['default']) {
-                            periods = item.periods['default'];
-                            break;
-                        }
-                    }
-                    periods = item.periods[value] || item.periods['default'];
-                    break;
-                default:
-                    periods = null;
-            }
-        }
+        const periods = getPeriodCount(id, values);
 
         let disabled;
         if (item.overrideDisabled) {
@@ -169,4 +176,4 @@ class Choice extends React.Component<ChoiceProps, {}> {
     }
 }
 
-export default Choice;
+export default connect(mapStateToProps, mapDispatchToProps)(Choice) as React.ComponentClass<ChoiceProps>;

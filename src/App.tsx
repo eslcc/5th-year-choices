@@ -1,16 +1,38 @@
 import * as React from 'react';
+import {Provider} from 'react-redux';
 
+import {
+    BrowserRouter as Router,
+    Route
+} from 'react-router-dom';
+
+import Home from './screens/home';
+import Basics from './screens/basics';
 import Table from './screens/Table';
+import Stepper from './stepper';
 
+import createStore from './Store';
 
+const store = createStore();
 
+interface AppState {
+    drawerOpen: boolean;
+}
 
-class App extends React.Component<{}, {}> {
+class App extends React.Component<{}, AppState> {
     render() {
         return (
-            <div className="App">
-                <Table />
-            </div>
+            <Provider store={store}>
+                <Router>
+                    <div>
+                        <Route path="/choice/:step" component={Stepper} />
+
+                        <Route exact path="/" component={Home} />
+                        <Route path="/choice/basics" component={Basics} />
+                        <Route path="/choice/table" component={Table} />
+                    </div>
+                </Router>
+            </Provider>
         );
     }
 }

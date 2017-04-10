@@ -29,6 +29,7 @@ export interface ChoiceValues {
     latY4: boolean;
     artY4: boolean;
     musY4: boolean;
+    gym: boolean;
     relY6: string;
     matY6: 'ma3' | 'ma5';
     his2p: boolean;
@@ -156,6 +157,7 @@ const choices: Choices = {
             I18n.Languages,
             ['bg', 'de', 'en', 'es', 'ee', 'fr', 'lv', 'lt', 'nl', 'pl', 'po', 'fi', 'sv']
         ) as ValueList,
+        periods: 4,
     },
     l2: {
         type: ChoiceFieldType.SELECT,
@@ -164,6 +166,7 @@ const choices: Choices = {
             I18n.Languages,
             ['en', 'fr', 'de']
         ) as ValueList,
+        periods: 3,
     },
     l3: {
         type: ChoiceFieldType.SELECT,
@@ -197,6 +200,7 @@ const choices: Choices = {
         displayName: I18n.Choices.relY4,
         options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>(I18n.Religions),
         error: values => values.relY4 === null && I18n.Errors.genericBlank,
+        periods: 0,
     },
     ecoY4: {
         type: ChoiceFieldType.BOOLEAN,
@@ -217,10 +221,18 @@ const choices: Choices = {
     // endregion
     // region Column 1
 
+    gym: {
+        type: ChoiceFieldType.BOOLEAN,
+        displayName: I18n.Choices.gym,
+        default: true,
+        overrideDisabled: () => true,
+        column: 1,
+        periods: 2,
+    },
     relY6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.relChange,
-        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Religions}),
+        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>(I18n.Religions),
         periods: 1,
         column: 1,
     },
@@ -297,7 +309,7 @@ const choices: Choices = {
             if (values.bio4p) {
                 return I18n.Errors.generic2pNot4p;
             }
-            if (!values.bio4p && !values.chi && !values.phy) {
+            if (!values.bio2p && !values.bio4p && !values.chi && !values.phy) {
                 return I18n.Errors.bio2p;
             }
             return null;
@@ -550,7 +562,49 @@ export default choices;
 export function buildChoiceDefaults(): ChoiceValues {
     const result = {};
     Object.keys(choices).forEach(key => {
-       result[key] = choices[key].default;
+        result[key] = choices[key].default;
     });
     return gimpTypeSafetyBeVeryCarefulWithThis<ChoiceValues>(result);
+}
+
+export function getPeriodCount(id: string, values: ChoiceValues): number {
+    const item = choices[id];
+    switch (typeof item.periods) {
+        case 'number':
+            return item.periods as number;
+        case 'object':
+            let value = values[id];
+            if (value || value == null) {
+                if (item.periods['default']) {
+                    return item.periods['default'];
+                }
+            }
+            return item.periods[value] || item.periods['default'];
+        default:
+            return null;
+    }
+}
+
+function sumOfPeriods(values: ChoiceValues) {
+    let sum = 0;
+    Object.keys(values).forEach(key => {
+        if (values[key]) {
+            sum += getPeriodCount(key, values);
+        }
+    });
+    return sum;
+}
+
+export function checkValidity(values: ChoiceValues): I18nField {
+    const sum = sumOfPeriods(values);
+    console.log(sum); // tslint:disable-line
+
+    if (sum < 29) {
+        return I18n.Errors.notEnough;
+    }
+    if (sum > 35) {
+        return I18n.Errors.tooMany;
+    }
+
+    return null;
 }
