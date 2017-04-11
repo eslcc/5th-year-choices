@@ -125,7 +125,7 @@ export type Choices = {[P in keyof ChoiceValues]: Choice};
 
 // Remove this when typescript/typescript#6480 is closed
 // tslint:disable-next-line
-function gimpTypeSafetyBeVeryCarefulWithThis<T>(thing: any): T {
+function gimpTypeSafetyDoNotUseOrYouWillBeFired<T>(thing: any): T {
     return thing;
 }
 
@@ -172,12 +172,12 @@ const choices: Choices = {
     l3: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l3,
-        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>(I18n.Languages)
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Languages)
     },
     l4: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l4,
-        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Languages})
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>({null: I18n.None.None, ...I18n.Languages})
     },
     onl: {
         type: ChoiceFieldType.SELECT,
@@ -199,7 +199,7 @@ const choices: Choices = {
     relY4: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.relY4,
-        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>(I18n.Religions),
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Religions),
         error: values => values.relY4 === null && I18n.Errors.genericBlank,
         periods: 0,
     },
@@ -233,7 +233,7 @@ const choices: Choices = {
     relY6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.relChange,
-        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>(I18n.Religions),
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Religions),
         periods: 1,
         column: 1,
     },
@@ -378,7 +378,7 @@ const choices: Choices = {
     l3Y6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l3,
-        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Languages}),
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>({null: I18n.None.None, ...I18n.Languages}),
         column: 3,
         periods: {null: 0, default: 4},
         default: null,
@@ -411,7 +411,7 @@ const choices: Choices = {
     l4Y6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l4,
-        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Languages}),
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>({null: I18n.None.None, ...I18n.Languages}),
         column: 3,
         periods: {null: 0, default: 4},
         error: values => !values.l4 ? I18n.Errors.l4Y6NotY4 : values.onlY6 ? I18n.Errors.l4AndOnl : null,
@@ -420,7 +420,7 @@ const choices: Choices = {
     onlY6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.onl,
-        options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>({
             null: I18n.None.None,
             ...pick(
                 I18n.Languages,
@@ -565,7 +565,7 @@ export function buildChoiceDefaults(): ChoiceValues {
     Object.keys(choices).forEach(key => {
         result[key] = choices[key].default;
     });
-    return gimpTypeSafetyBeVeryCarefulWithThis<ChoiceValues>(result);
+    return gimpTypeSafetyDoNotUseOrYouWillBeFired<ChoiceValues>(result);
 }
 
 export function getPeriodCount(id: string, values: ChoiceValues): number {
