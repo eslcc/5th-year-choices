@@ -1,9 +1,12 @@
-// tslint:disable-next-line
+import { clone } from 'lodash';
+
 export interface I18nField {
     en: string;
     fr?: string;
     de?: string;
 }
+
+export interface I18nSubstitutableError extends I18nField {}
 
 export class Choices {
     static readonly personName: I18nField = {
@@ -247,14 +250,14 @@ export class Errors {
     static readonly classTeacherBlank: I18nField = {
         en: 'Your class teacher cannot be blank.'
     };
-    static readonly notEnoughCols1To4: I18nField = {
-        en: 'The total number of periods in the compulsory and optional subject categories must add up to at least 29.'
+    static readonly notEnoughCols1To4: I18nSubstitutableError = {
+        en: 'The total number of periods in columns 1-4 must add up to at least 29 (you have %s).'
     };
-    static readonly notEnough: I18nField = {
-        en: 'The total number of periods must be at least 31.'
+    static readonly notEnough: I18nSubstitutableError = {
+        en: 'The total number of periods must be at least 31 (you have %s).'
     };
-    static readonly tooMany: I18nField = {
-        en: 'The total number of periods cannot be more than 35.'
+    static readonly tooMany: I18nSubstitutableError = {
+        en: 'The total number of periods cannot be more than 35 (you have %s).'
     };
     static readonly hisGeoPhilo2p: I18nField = {
         en: '2 period History, Geography and Philosophy are compulsory if not chosen as a 4 period course.'
@@ -266,10 +269,10 @@ export class Errors {
         en: 'A 2 period subject cannot be chosen together with its 4 period counterpart.'
     };
     static readonly notEnoughCol3: I18nField = {
-        en: 'At least 2 optional subjects must be chosen.'
+        en: 'At least 2 optional subjects must be chosen (you have %s).'
     };
     static readonly tooManyCol3: I18nField = {
-        en: 'No more than 4 optional subjects may be chosen.'
+        en: 'No more than 4 optional subjects may be chosen (you have %s).'
     };
     static readonly ecoAndLatin: I18nField = {
         en: 'Economics and Latin cannot both be chosen as they are timetabled simultaneously.'
@@ -311,4 +314,16 @@ export class Errors {
     static readonly labOnlyOne: I18nField = {
         en: 'Only one laboratory subject can be chosen.'
     };
+
+    public static substitute(error: I18nSubstitutableError, ...subs: string[]): I18nField {
+        const result = clone(error);
+        for (const lang in result) {
+            if (result.hasOwnProperty(lang)) {
+                subs.forEach(sub => {
+                    result[lang] = result[lang].replace(/%s/, sub);
+                });
+            }
+        }
+        return result;
+    }
 }

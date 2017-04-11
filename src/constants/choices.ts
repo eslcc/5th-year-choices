@@ -146,7 +146,8 @@ const choices: Choices = {
     classTeacher: {
         type: ChoiceFieldType.INPUT,
         displayName: I18n.Choices.classTeacher,
-        default: ''
+        default: '',
+        error: values => (values.classTeacher as string).length === 0 && I18n.Errors.classTeacherBlank,
     },
     // endregion
     // region Year 4 baseline subjects
@@ -405,7 +406,7 @@ const choices: Choices = {
         displayName: I18n.Choices.lat,
         column: 3,
         periods: 4,
-        error: values => values.ecoY6 && I18n.Errors.ecoAndLatin,
+        error: values => !values.latY4 ? I18n.Errors.latY6NotY4 : values.ecoY6 && I18n.Errors.ecoAndLatin,
     },
     l4Y6: {
         type: ChoiceFieldType.SELECT,
@@ -413,7 +414,7 @@ const choices: Choices = {
         options: gimpTypeSafetyBeVeryCarefulWithThis<ValueList>({null: I18n.None.None, ...I18n.Languages}),
         column: 3,
         periods: {null: 0, default: 4},
-        error: values => values.onlY6 ? I18n.Errors.l4AndOnl : null,
+        error: values => !values.l4 ? I18n.Errors.l4Y6NotY4 : values.onlY6 ? I18n.Errors.l4AndOnl : null,
         default: null,
     },
     onlY6: {
@@ -429,7 +430,7 @@ const choices: Choices = {
         column: 3,
         periods: {null: 0, default: 4},
         default: null,
-        error: values => values.l4Y6 ? I18n.Errors.l4AndOnl : null,
+        error: values => !values.onl ? I18n.Errors.onlY6NotY4 : values.l4Y6 ? I18n.Errors.l4AndOnl : null,
     },
     // endregion
     // region Column 4
@@ -585,26 +586,59 @@ export function getPeriodCount(id: string, values: ChoiceValues): number {
     }
 }
 
-function sumOfPeriods(values: ChoiceValues) {
+function sumOfPeriods(values: ChoiceValues, filter: (c: Choice, v: ChoiceValueType) => boolean = () => true) {
     let sum = 0;
     Object.keys(values).forEach(key => {
         if (values[key]) {
-            sum += getPeriodCount(key, values);
+            // console.log([key, filter(values[key])]);
+            if (filter(choices[key], values[key])) {
+                sum += getPeriodCount(key, values);
+            }
         }
     });
     return sum;
 }
 
-export function checkValidity(values: ChoiceValues): I18nField {
-    const sum = sumOfPeriods(values);
-    console.log(sum); // tslint:disable-line
+function countChoices(values: ChoiceValues, filter: (c: Choice, v: ChoiceValueType) => boolean = () => true) {
+    let count = 0;
+    Object.keys(values).forEach(key => {
+        if (values[key]) {
+            // console.log([key, filter(values[key])]);
+            if (filter(choices[key], values[key])) {
+                count += 1;
+            }
+        }
+    });
+    return count;
+}
 
-    if (sum < 29) {
-        return I18n.Errors.notEnough;
+export function checkValidity(values: ChoiceValues): I18nField | number {
+
+    // First, check the sum of all the columns
+    const sum = sumOfPeriods(values);
+
+    if (sum < 31) {
+        return I18n.Errors.substitute(I18n.Errors.notEnough, sum.toFixed(0));
     }
     if (sum > 35) {
-        return I18n.Errors.tooMany;
+        return I18n.Errors.substitute(I18n.Errors.tooMany, sum.toFixed(0));
     }
 
-    return null;
+    // Second, check the sum of columns 1-4
+    const sum1To4 = sumOfPeriods(values, c => (c.column && c.column >= 1 && c.column <= 4))
+        + 4 + 3; // L1 and L2 aren't included in the count because they don't have a column field
+    if (sum1To4 < 29) {
+        return I18n.Errors.substitute(I18n.Errors.notEnoughCols1To4, sum1To4.toFixed(0));
+    }
+
+    // Check the number of optional subjects
+    const countOptional = countChoices(values, c => c.column === 3);
+    if (countOptional < 2) {
+        return I18n.Errors.substitute(I18n.Errors.notEnoughCol3, countOptional.toFixed(0));
+    }
+    if (countOptional > 4) {
+        return I18n.Errors.substitute(I18n.Errors.tooManyCol3, countOptional.toFixed(0));
+    }
+
+    return sum;
 }

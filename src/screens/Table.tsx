@@ -9,6 +9,7 @@ import {ChoiceValues} from '../constants/choices';
 import {AppState} from '../Store';
 import {connect} from 'react-redux';
 import {RouteComponentProps} from "react-router";
+import {I18nField} from "../constants/i18n";
 
 interface TableProps {
     values: ChoiceValues;
@@ -19,13 +20,18 @@ const mapStateToProps = (state: AppState): TableProps => ({
 });
 
 class Table extends React.Component<TableProps, void> {
+    error(err: I18nField | number): err is I18nField {
+        return err.hasOwnProperty('en');
+    }
+
     render() {
-        const error = Choices.checkValidity(this.props.values);
+        const errorOrTotal = Choices.checkValidity(this.props.values);
+        const valid = typeof errorOrTotal === 'number';
         return (
             <div>
-                <div className={`error-bar ${error === null ? 'valid' : 'invalid'}`}>
-                    <span className="label">{error === null ? 'Valid' : 'Invalid'}. </span>
-                    {error && error.en}
+                <div className={`error-bar ${valid ? 'valid' : 'invalid'}`}>
+                    <span className="label">{valid ? `Valid. Total periods: ${errorOrTotal}` : 'Invalid'}. </span>
+                    {this.error(errorOrTotal) && errorOrTotal.en}
                 </div>
                 <div className="columns">
                     {[1, 2, 3, 4, 5]
