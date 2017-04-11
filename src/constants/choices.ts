@@ -123,7 +123,7 @@ export interface Choice {
 export type Choices = {[P in keyof ChoiceValues]: Choice};
 // endregion
 
-// Remove this when typescript/typescript#6480 is closed
+// Remove this when microsoft/typescript#6480 is closed
 // tslint:disable-next-line
 function gimpTypeSafetyDoNotUseOrYouWillBeFired<T>(thing: any): T {
     return thing;
