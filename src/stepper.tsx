@@ -26,7 +26,7 @@ export default class Stepper extends React.Component<RouteComponentProps<{step: 
     }
 
     componentDidMount() {
-        this.list = window.matchMedia('screen and (max-width: 800px)');
+        this.list = window.matchMedia('screen and (max-width: 580px)');
         this.list.addListener(this.listener);
     }
 

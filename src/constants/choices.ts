@@ -140,18 +140,21 @@ const choices: Choices = {
         displayName: I18n.Choices.personName,
         default: '',
         error: values => (values.name as string).length === 0 && I18n.Errors.nameBlank,
+        hidePeriods: () => true,
     },
     classCode: {
         type: ChoiceFieldType.INPUT,
         displayName: I18n.Choices.class,
         default: '',
         error: values => (values.classCode as string).length === 0 && I18n.Errors.classNameBlank,
+        hidePeriods: () => true,
     },
     classTeacher: {
         type: ChoiceFieldType.INPUT,
         displayName: I18n.Choices.classTeacher,
         default: '',
         error: values => (values.classTeacher as string).length === 0 && I18n.Errors.classTeacherBlank,
+        hidePeriods: () => true,
     },
     // endregion
     // region Year 4 baseline subjects
@@ -187,11 +190,13 @@ const choices: Choices = {
         options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Languages),
         error: values => !values.l3 && I18n.Errors.genericBlank,
         overrideDisabled: () => false,
+        hidePeriods: () => true,
     },
     l4: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l4,
-        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>({null: I18n.None.None, ...I18n.Languages})
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>({null: I18n.None.None, ...I18n.Languages}),
+        hidePeriods: () => true,
     },
     onl: {
         type: ChoiceFieldType.SELECT,
@@ -200,6 +205,7 @@ const choices: Choices = {
             I18n.Languages,
             ['ie', 'mt', 'sv', 'fi']
         ) as ValueList,
+        hidePeriods: () => true,
     },
     matY4: {
         type: ChoiceFieldType.SELECT,
@@ -210,6 +216,7 @@ const choices: Choices = {
         ) as ValueList,
         error: values => !values.matY4 && I18n.Errors.genericBlank,
         overrideDisabled: () => false,
+        hidePeriods: () => true,
     },
     relY4: {
         type: ChoiceFieldType.SELECT,
@@ -218,22 +225,27 @@ const choices: Choices = {
         error: values => !values.relY4 && I18n.Errors.genericBlank,
         overrideDisabled: () => false,
         periods: 0,
+        hidePeriods: () => true,
     },
     ecoY4: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.eco,
+        hidePeriods: () => true,
     },
     latY4: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.lat,
+        hidePeriods: () => true,
     },
     artY4: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.art,
+        hidePeriods: () => true,
     },
     musY4: {
         type: ChoiceFieldType.BOOLEAN,
         displayName: I18n.Choices.mus,
+        hidePeriods: () => true,
     },
     // endregion
     // region Column 1
@@ -249,9 +261,12 @@ const choices: Choices = {
     relY6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.relChange,
+        default: undefined,
         options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>({null: I18n.None.None, ...I18n.Religions}),
         periods: {null: 1, default: 1},
         column: 1,
+        error: values => typeof values.relY6 === 'undefined' && I18n.Errors.genericBlank,
+        overrideDisabled: () => false,
     },
     matY6: {
         type: ChoiceFieldType.SELECT,
@@ -263,6 +278,8 @@ const choices: Choices = {
         column: 1,
         periods: {ma3: 3, ma5: 5},
         warning: values => (values.matY6 === 'ma5' && values.matY4 === 'ma4') && I18n.Warnings.ma5AfterMa4,
+        error: values => !values.matY6 && I18n.Errors.genericBlank,
+        overrideDisabled: () => false,
     },
     // endregion
     // region Column 2
@@ -599,12 +616,15 @@ export function getPeriodCount(id: string, values: ChoiceValues, allowZeros: boo
         case 'object':
             if (item.periods[value]) {
                 result = item.periods[value];
+                break;
             }
             if (!value && typeof item.periods['null'] !== 'undefined') {
                 result = item.periods['null'];
+                break;
             }
             if (item.periods['default']) {
                 result = item.periods['default'];
+                break;
             }
             result = item.periods[value] || item.periods['default'] || 0;
             break;
@@ -618,7 +638,7 @@ function sumOfPeriods(values: ChoiceValues, filter: (c: Choice, v: ChoiceValueTy
     let sum = 0;
     Object.keys(values).forEach(key => {
         if (filter(choices[key], values[key])) {
-            sum += getPeriodCount(key, values);
+            sum += getPeriodCount(key, values, true);
         }
     });
     return sum;

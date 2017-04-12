@@ -1,4 +1,4 @@
-import {ChoiceValueType} from "../constants/choices";
+import {ChoiceValueType} from '../constants/choices';
 export type Action = {
     type: 'choices.CHOICE_CHANGE',
     key: string,

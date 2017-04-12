@@ -16,4 +16,4 @@ export default ({ values }: { values: ChoiceValues }) => {
             {isError(errorOrTotal) && errorOrTotal.en}
         </div>
     );
-}
+};

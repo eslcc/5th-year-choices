@@ -182,7 +182,7 @@ class Choice extends React.Component<ChoiceProps, {}> {
                     <b className="warning">{warning.en}</b>
                 )}
             </div>
-        )
+        );
     }
 }
 
