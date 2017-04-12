@@ -1,15 +1,14 @@
 import * as React from 'react';
 
-import choices, * as Choices from '../constants/choices';
-import {objectToNestedArray} from '../helpers';
+import choices from '../constants/choices';
 import Choice from '../Choice/component';
-import {pickBy} from 'lodash';
+import {pickBy, toPairs} from 'lodash';
 import './table.css';
-import {ChoiceValues} from '../constants/choices';
+import { ChoiceValues, Choice as ChoiceType } from '../constants/choices';
 import {AppState} from '../Store';
 import {connect} from 'react-redux';
-import {RouteComponentProps} from "react-router";
-import {I18nField} from "../constants/i18n";
+import {RouteComponentProps} from 'react-router';
+import ErrorBar from '../ErrorBar';
 
 interface TableProps {
     values: ChoiceValues;
@@ -20,30 +19,22 @@ const mapStateToProps = (state: AppState): TableProps => ({
 });
 
 class Table extends React.Component<TableProps, void> {
-    error(err: I18nField | number): err is I18nField {
-        return err.hasOwnProperty('en');
-    }
-
     render() {
-        const errorOrTotal = Choices.checkValidity(this.props.values);
-        const valid = typeof errorOrTotal === 'number';
         return (
             <div>
-                <div className={`error-bar ${valid ? 'valid' : 'invalid'}`}>
-                    <span className="label">{valid ? `Valid. Total periods: ${errorOrTotal}` : 'Invalid'}. </span>
-                    {this.error(errorOrTotal) && errorOrTotal.en}
-                </div>
+                <ErrorBar values={this.props.values} />
                 <div className="columns">
                     {[1, 2, 3, 4, 5]
                         .map(column => pickBy(choices, c => c.column === column))
                         .map((items, column) => (
                                 <div className="column" key={`column-${column}`}>
-                                    {objectToNestedArray(items)
-                                        .map(choice => (
+                                    {toPairs(items)
+                                        .map((keyValuePair: [string, ChoiceType]) => (
                                                 <Choice
-                                                    key={choice[0]}
-                                                    id={choice[0]}
-                                                    item={choice[1]}
+                                                    key={keyValuePair[0]}
+                                                    id={keyValuePair[0]}
+                                                    item={keyValuePair[1]}
+                                                    screen="table"
                                                 />
                                             )
                                         )}

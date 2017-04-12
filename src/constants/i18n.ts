@@ -268,10 +268,10 @@ export class Errors {
     static readonly generic2pNot4p: I18nField = {
         en: 'A 2 period subject cannot be chosen together with its 4 period counterpart.'
     };
-    static readonly notEnoughCol3: I18nField = {
+    static readonly notEnoughCol3: I18nSubstitutableError = {
         en: 'At least 2 optional subjects must be chosen (you have %s).'
     };
-    static readonly tooManyCol3: I18nField = {
+    static readonly tooManyCol3: I18nSubstitutableError = {
         en: 'No more than 4 optional subjects may be chosen (you have %s).'
     };
     static readonly ecoAndLatin: I18nField = {

@@ -6,11 +6,38 @@ import {
 } from 'material-ui/Stepper';
 import {RouteComponentProps} from 'react-router-dom';
 
-export default class Stepper extends React.Component<RouteComponentProps<any>, void> {
+interface StepperState {
+    smallScreen: boolean;
+}
+
+export default class Stepper extends React.Component<RouteComponentProps<{step: string}>, StepperState> {
+    list: MediaQueryList = null;
+    listener: MediaQueryListListener = (query: MediaQueryList) => {
+        this.setState({
+            smallScreen: query.matches
+        });
+    }
+
+    constructor(props: RouteComponentProps<{step: string}>) {
+        super(props);
+        this.state = {
+            smallScreen: false,
+        };
+    }
+
+    componentDidMount() {
+        this.list = window.matchMedia('screen and (max-width: 800px)');
+        this.list.addListener(this.listener);
+    }
+
+    componentWillUnmount() {
+        this.list.removeListener(this.listener);
+    }
+
     render() {
         const { match } = this.props;
         let index = 0;
-        switch (match.params.step) {
+        switch ((match.params).step) {
             case 'basics':
                 index = 0;
                 break;
@@ -25,7 +52,10 @@ export default class Stepper extends React.Component<RouteComponentProps<any>, v
         }
         return (
             <div>
-                <StepperComponent activeStep={index} orientation="horizontal">
+                <StepperComponent
+                    activeStep={index}
+                    orientation={this.state.smallScreen ? 'vertical' : 'horizontal'}
+                >
                     <Step>
                         <StepLabel>Input basic information</StepLabel>
                     </Step>

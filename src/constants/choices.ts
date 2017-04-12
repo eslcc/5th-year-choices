@@ -117,7 +117,11 @@ export interface Choice {
     /**
      * This can be used to enable/disable the choice, whatever the return value of error.
      */
-    overrideDisabled?: (choices: ChoiceValues) => boolean;
+    overrideDisabled?: (choices: ChoiceValues, screen?: string) => boolean;
+    /**
+     * Whether or not to hide this choice's period count in the UI.
+     */
+    hidePeriods?: (choices: ChoiceValues, screen?: string) => boolean;
 }
 
 export type Choices = {[P in keyof ChoiceValues]: Choice};
@@ -158,7 +162,11 @@ const choices: Choices = {
             I18n.Languages,
             ['bg', 'de', 'en', 'es', 'ee', 'fr', 'lv', 'lt', 'nl', 'pl', 'po', 'fi', 'sv']
         ) as ValueList,
+        column: 1,
         periods: 4,
+        error: values => !values.l1 && I18n.Errors.genericBlank,
+        overrideDisabled: (values, screen) => screen === 'table',
+        hidePeriods: (values, screen) => screen !== 'table',
     },
     l2: {
         type: ChoiceFieldType.SELECT,
@@ -167,12 +175,18 @@ const choices: Choices = {
             I18n.Languages,
             ['en', 'fr', 'de']
         ) as ValueList,
+        column: 1,
         periods: 3,
+        error: values => !values.l2 && I18n.Errors.genericBlank,
+        overrideDisabled: (values, screen) => screen === 'table',
+        hidePeriods: (values, screen) => screen !== 'table',
     },
     l3: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.l3,
-        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Languages)
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Languages),
+        error: values => !values.l3 && I18n.Errors.genericBlank,
+        overrideDisabled: () => false,
     },
     l4: {
         type: ChoiceFieldType.SELECT,
@@ -194,13 +208,15 @@ const choices: Choices = {
             I18n.Maths,
             ['ma4', 'ma6']
         ) as ValueList,
-        error: values => values.matY4 === null && I18n.Errors.genericBlank,
+        error: values => !values.matY4 && I18n.Errors.genericBlank,
+        overrideDisabled: () => false,
     },
     relY4: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.relY4,
         options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Religions),
-        error: values => values.relY4 === null && I18n.Errors.genericBlank,
+        error: values => !values.relY4 && I18n.Errors.genericBlank,
+        overrideDisabled: () => false,
         periods: 0,
     },
     ecoY4: {
@@ -233,8 +249,8 @@ const choices: Choices = {
     relY6: {
         type: ChoiceFieldType.SELECT,
         displayName: I18n.Choices.relChange,
-        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Religions),
-        periods: 1,
+        options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>({null: I18n.None.None, ...I18n.Religions}),
+        periods: {null: 1, default: 1},
         column: 1,
     },
     matY6: {
@@ -568,32 +584,41 @@ export function buildChoiceDefaults(): ChoiceValues {
     return gimpTypeSafetyDoNotUseOrYouWillBeFired<ChoiceValues>(result);
 }
 
-export function getPeriodCount(id: string, values: ChoiceValues): number {
+export function getPeriodCount(id: string, values: ChoiceValues, allowZeros: boolean = true): number {
     const item = choices[id];
+    const value = values[id];
+    let result;
     switch (typeof item.periods) {
         case 'number':
-            return item.periods as number;
-        case 'object':
-            let value = values[id];
-            if (value || value == null) {
-                if (item.periods['default']) {
-                    return item.periods['default'];
-                }
+            if (value) {
+                result = item.periods as number;
+            } else {
+                result = allowZeros ? 0 : item.periods as number;
             }
-            return item.periods[value] || item.periods['default'];
+            break;
+        case 'object':
+            if (item.periods[value]) {
+                result = item.periods[value];
+            }
+            if (!value && typeof item.periods['null'] !== 'undefined') {
+                result = item.periods['null'];
+            }
+            if (item.periods['default']) {
+                result = item.periods['default'];
+            }
+            result = item.periods[value] || item.periods['default'] || 0;
+            break;
         default:
-            return null;
+            result = 0;
     }
+    return result;
 }
 
 function sumOfPeriods(values: ChoiceValues, filter: (c: Choice, v: ChoiceValueType) => boolean = () => true) {
     let sum = 0;
     Object.keys(values).forEach(key => {
-        if (values[key]) {
-            // console.log([key, filter(values[key])]);
-            if (filter(choices[key], values[key])) {
-                sum += getPeriodCount(key, values);
-            }
+        if (filter(choices[key], values[key])) {
+            sum += getPeriodCount(key, values);
         }
     });
     return sum;
@@ -616,6 +641,7 @@ export function checkValidity(values: ChoiceValues): I18nField | number {
 
     // First, check the sum of all the columns
     const sum = sumOfPeriods(values);
+    console.log(sum);
 
     if (sum < 31) {
         return I18n.Errors.substitute(I18n.Errors.notEnough, sum.toFixed(0));

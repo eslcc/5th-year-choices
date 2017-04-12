@@ -1,13 +1,15 @@
 import * as React from 'react';
-import choices from '../constants/choices';
+import choices, { Choice as ChoiceType} from '../constants/choices';
 import Choice from '../Choice/component';
-import {objectToNestedArray} from '../helpers';
 import FlatButton from 'material-ui/FlatButton';
 import {AppState} from '../Store';
 import {ChoiceValues} from '../constants/choices';
 import {connect} from 'react-redux';
 import {RouteComponentProps} from 'react-router';
-import {pick} from 'lodash';
+import {pick, toPairs, values} from 'lodash';
+
+const BASICS = ['name', 'classCode', 'classTeacher', 'l1', 'l2', 'l3', 'l4', 'onl', 'matY4',
+                            'relY4', 'ecoY4', 'latY4', 'artY4', 'musY4'];
 
 interface BasicsProps {
     values: ChoiceValues;
@@ -19,10 +21,8 @@ const mapStateToProps = (state: AppState): BasicsProps => ({
 
 class Basics extends React.Component<RouteComponentProps<any> & BasicsProps, void> {
     allValid() {
-        const {values} = this.props;
-        return values.name.length > 0
-            && values.classCode.length > 0
-            && values.classTeacher.length > 0;
+        return !(values(pick(choices, BASICS)) as ChoiceType[])
+        .find(i => typeof i.error !== 'function' ? false : !!i.error(this.props.values));
     }
 
     continue() {
@@ -33,11 +33,8 @@ class Basics extends React.Component<RouteComponentProps<any> & BasicsProps, voi
     render() {
         return (
             <div>
-                {objectToNestedArray(
-                    pick(choices,
-                         ['name', 'classCode', 'classTeacher', 'l1', 'l2', 'l3', 'l4', 'onl', 'matY4',
-                            'relY4', 'ecoY4', 'latY4', 'artY4', 'musY4']
-                    )
+                {toPairs(
+                    pick(choices, BASICS)
                 ).map(item => (
                     /* tslint:disable */
                     <Choice

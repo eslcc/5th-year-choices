@@ -27,6 +27,7 @@ interface ChoiceProps {
     error?: I18nField | Falsey;
     warning?: I18nField | Falsey;
     disabled?: boolean;
+    screen?: string;
 }
 
 const mapStateToProps = (state: AppState): ChoiceProps => ({
@@ -102,7 +103,7 @@ class SelectChoice extends React.Component<ChoiceProps, ChoiceState> {
 
 class Choice extends React.Component<ChoiceProps, {}> {
     render() {
-        const {item, values, id} = this.props;
+        const {item, values, id, screen} = this.props;
 
         let error: I18nField | Falsey = null;
         if (item.error) {
@@ -114,13 +115,20 @@ class Choice extends React.Component<ChoiceProps, {}> {
             warning = item.warning(values);
         }
 
-        const periods = getPeriodCount(id, values);
+        const periods = getPeriodCount(id, values, false);
 
         let disabled;
         if (item.overrideDisabled) {
-            disabled = item.overrideDisabled(values);
+            disabled = item.overrideDisabled(values, screen);
         } else {
             disabled = !!error;
+        }
+
+        let showPeriods;
+        if (item.hidePeriods) {
+            showPeriods = !item.hidePeriods(values, screen);
+        } else {
+            showPeriods = true;
         }
 
         let component = null;
@@ -164,8 +172,8 @@ class Choice extends React.Component<ChoiceProps, {}> {
         return (
             <div className="choice">
                 {component}
-                {periods && (
-                    <i>{periods} periods</i>
+                {showPeriods && (
+                    <i>{periods} {periods === 1 ? 'period' : 'periods'}/week</i>
                 )}
                 {error && (
                     <b className="error">{error.en}</b>

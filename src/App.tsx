@@ -8,7 +8,7 @@ import {
 
 import Home from './screens/home';
 import Basics from './screens/basics';
-import Table from './screens/Table';
+import Table from './screens/table';
 import Stepper from './stepper';
 
 import createStore from './Store';

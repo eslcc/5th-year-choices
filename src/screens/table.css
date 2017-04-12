@@ -3,7 +3,7 @@
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
+    width: 100vw;
     height: 4rem;
     font-size: 2em;
     display: flex;
@@ -12,6 +12,19 @@
     padding-left: 4rem;
     font-weight: 400;
     z-index: 100;
+}
+
+@media screen and (max-width: 1280px) {
+    .error-bar {
+        font-size: 1.5em;
+        padding-left: 1rem;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .error-bar {
+        font-size: 1rem;
+    }
 }
 
 .error-bar.valid {
@@ -28,7 +41,7 @@
 }
 
 .columns {
-    margin-bottom: 4em;
+    margin-bottom: 5em;
     width: 100vw;
     display: flex;
     flex-direction: column;
