@@ -124,7 +124,7 @@ class Choice extends React.Component<ChoiceProps, {}> {
             disabled = !!error;
         }
 
-        let showPeriods;
+        let showPeriods: boolean;
         if (item.hidePeriods) {
             showPeriods = !item.hidePeriods(values, screen);
         } else {

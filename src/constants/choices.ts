@@ -74,7 +74,7 @@ export interface Choice {
     /**
      * The type of the choice option
      */
-        type: ChoiceFieldType;
+    type: ChoiceFieldType;
     /**
      * The name to display in the browser. May be translated.
      */
@@ -83,7 +83,7 @@ export interface Choice {
      * The default value of the choice. If blank, assumes the default for the type
      * (blank for select, empty string for input, false for boolean)
      */
-        default?: null | boolean | string | ValueList;
+    default?: null | boolean | string | ValueList;
     /**
      * If the choice type is select, the options.
      */
@@ -661,7 +661,6 @@ export function checkValidity(values: ChoiceValues): I18nField | number {
 
     // First, check the sum of all the columns
     const sum = sumOfPeriods(values);
-    console.log(sum);
 
     if (sum < 31) {
         return I18n.Errors.substitute(I18n.Errors.notEnough, sum.toFixed(0));
