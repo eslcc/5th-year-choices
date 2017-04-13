@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/classnames": "0.0.32",
     "@types/jest": "^19.2.2",
     "@types/lodash": "^4.14.62",
     "@types/material-ui": "^0.16.60",
@@ -13,6 +14,7 @@
     "@types/react-router": "^4.0.4",
     "@types/react-router-dom": "^4.0.3",
     "@types/react-tap-event-plugin": "0.0.30",
+    "classnames": "^2.2.5",
     "lodash": "^4.17.4",
     "material-ui": "^0.17.2",
     "react": "^15.5.3",

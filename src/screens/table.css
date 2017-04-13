@@ -87,7 +87,20 @@
 
 .choice .error {
     display: block;
+    
+}
+
+.choice .error.blocking {
     color: #F44336;
+}
+
+.choice .error.non-blocking {
+    color: #727272;
+    display: none;
+}
+
+.choice:hover .error.non-blocking, .choice.hover .error.non-blocking {
+    display: block;
 }
 
 .choice .warning {

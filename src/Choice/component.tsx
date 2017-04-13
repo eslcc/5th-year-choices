@@ -18,6 +18,8 @@ import {Action} from './actions';
 import {connect} from 'react-redux';
 import * as actions from '../Choice/actions';
 
+const classNames = require('classnames');
+
 interface ChoiceProps {
     id?: string;
     item?: ChoiceInterface;
@@ -110,6 +112,16 @@ class Choice extends React.Component<ChoiceProps, {}> {
             error = item.error(values);
         }
 
+        let block = false;
+        if (item.block) {
+            const blockResult = item.block(values);
+            if (blockResult === 'err') {
+                block = !!error;
+            } else {
+                block = blockResult;
+            }
+        }
+
         let warning: I18nField | Falsey = null;
         if (item.warning) {
             warning = item.warning(values);
@@ -176,7 +188,7 @@ class Choice extends React.Component<ChoiceProps, {}> {
                     <i>{periods} {periods === 1 ? 'period' : 'periods'}/week</i>
                 )}
                 {error && (
-                    <b className="error">{error.en}</b>
+                    <b className={classNames('error', block ? 'blocking' : 'non-blocking')}>{error.en}</b>
                 )}
                 {warning && (
                     <b className="warning">{warning.en}</b>

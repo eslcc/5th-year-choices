@@ -107,6 +107,11 @@ export interface Choice {
      */
     error?: (choices: ChoiceValues) => I18nField | Falsey;
     /**
+     * Whether the choice is <i>blocked</i> or not, that is, whether it should prevent the user from proceeding.
+     * Return the magic value 'err' to use !!error().
+     */
+    block?: (choices: ChoiceValues) => boolean | 'err';
+    /**
      * A callback that is called with all the current choices to determine whether the user should be warned.
      * Warnings are normally used for choices that are technically valid but dubious
      * (for example, choosing ma4 in 4th/5th but ma5 in 6th/7th)
@@ -140,6 +145,7 @@ const choices: Choices = {
         displayName: I18n.Choices.personName,
         default: '',
         error: values => (values.name as string).length === 0 && I18n.Errors.nameBlank,
+        block: () => 'err',
         hidePeriods: () => true,
     },
     classCode: {
@@ -147,6 +153,7 @@ const choices: Choices = {
         displayName: I18n.Choices.class,
         default: '',
         error: values => (values.classCode as string).length === 0 && I18n.Errors.classNameBlank,
+        block: () => 'err',
         hidePeriods: () => true,
     },
     classTeacher: {
@@ -154,6 +161,7 @@ const choices: Choices = {
         displayName: I18n.Choices.classTeacher,
         default: '',
         error: values => (values.classTeacher as string).length === 0 && I18n.Errors.classTeacherBlank,
+        block: () => 'err',
         hidePeriods: () => true,
     },
     // endregion
@@ -168,6 +176,7 @@ const choices: Choices = {
         column: 1,
         periods: 4,
         error: values => !values.l1 && I18n.Errors.genericBlank,
+        block: () => 'err',
         overrideDisabled: (values, screen) => screen === 'table',
         hidePeriods: (values, screen) => screen !== 'table',
     },
@@ -181,6 +190,7 @@ const choices: Choices = {
         column: 1,
         periods: 3,
         error: values => !values.l2 && I18n.Errors.genericBlank,
+        block: () => 'err',
         overrideDisabled: (values, screen) => screen === 'table',
         hidePeriods: (values, screen) => screen !== 'table',
     },
@@ -189,6 +199,7 @@ const choices: Choices = {
         displayName: I18n.Choices.l3,
         options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Languages),
         error: values => !values.l3 && I18n.Errors.genericBlank,
+        block: () => 'err',
         overrideDisabled: () => false,
         hidePeriods: () => true,
     },
@@ -215,6 +226,7 @@ const choices: Choices = {
             ['ma4', 'ma6']
         ) as ValueList,
         error: values => !values.matY4 && I18n.Errors.genericBlank,
+        block: () => 'err',
         overrideDisabled: () => false,
         hidePeriods: () => true,
     },
@@ -223,6 +235,7 @@ const choices: Choices = {
         displayName: I18n.Choices.relY4,
         options: gimpTypeSafetyDoNotUseOrYouWillBeFired<ValueList>(I18n.Religions),
         error: values => !values.relY4 && I18n.Errors.genericBlank,
+        block: () => 'err',
         overrideDisabled: () => false,
         periods: 0,
         hidePeriods: () => true,
@@ -279,6 +292,7 @@ const choices: Choices = {
         periods: {ma3: 3, ma5: 5},
         warning: values => (values.matY6 === 'ma5' && values.matY4 === 'ma4') && I18n.Warnings.ma5AfterMa4,
         error: values => !values.matY6 && I18n.Errors.genericBlank,
+        block: () => 'err',
         overrideDisabled: () => false,
     },
     // endregion
@@ -297,6 +311,7 @@ const choices: Choices = {
             }
             return null;
         },
+        block: () => 'err',
         overrideDisabled: values => values.his4p,
         default: true
     },
@@ -314,6 +329,7 @@ const choices: Choices = {
             }
             return null;
         },
+        block: () => 'err',
         overrideDisabled: values => values.geo4p,
         default: true
     },
@@ -331,6 +347,7 @@ const choices: Choices = {
             }
             return null;
         },
+        block: () => 'err',
         overrideDisabled: values => values.philo4p,
         default: true
     },
@@ -348,6 +365,7 @@ const choices: Choices = {
             }
             return null;
         },
+        block: values => !values.bio2p && !values.bio4p && !values.chi && !values.phy,
         overrideDisabled: values => values.bio4p,
     },
     // endregion
@@ -370,6 +388,7 @@ const choices: Choices = {
         column: 3,
         periods: 4,
         error: values => values.bio2p && I18n.Errors.generic2pNot4p,
+        block: () => 'err',
     },
     art4p: {
         type: ChoiceFieldType.BOOLEAN,
@@ -377,6 +396,7 @@ const choices: Choices = {
         column: 3,
         periods: 4,
         error: values => values.art2p && I18n.Errors.generic2pNot4p,
+        block: () => 'err',
         warning: values => values.art4p && !values.artY4 && I18n.Warnings.artMusNotY4,
     },
     mus4p: {
@@ -385,6 +405,7 @@ const choices: Choices = {
         column: 3,
         periods: 4,
         error: values => values.mus2p && I18n.Errors.generic2pNot4p,
+        block: () => 'err',
         warning: values => values.mus4p && !values.musY4 && I18n.Warnings.artMusNotY4,
     },
     his4p: {
@@ -392,6 +413,7 @@ const choices: Choices = {
         displayName: I18n.Choices.his,
         column: 3,
         periods: 4,
+        block: () => false,
         error: values => values.his2p && I18n.Errors.generic2pNot4p,
     },
     geo4p: {
@@ -399,6 +421,7 @@ const choices: Choices = {
         displayName: I18n.Choices.geo,
         column: 3,
         periods: 4,
+        block: () => false,
         error: values => values.geo2p && I18n.Errors.generic2pNot4p,
     },
     philo4p: {
@@ -406,6 +429,7 @@ const choices: Choices = {
         displayName: I18n.Choices.philo,
         column: 3,
         periods: 4,
+        block: () => false,
         error: values => values.philo2p && I18n.Errors.generic2pNot4p,
     },
     l3Y6: {
@@ -422,17 +446,17 @@ const choices: Choices = {
         column: 3,
         periods: 4,
         error: values => {
-            if (!values.ecoY4) {
-                return I18n.Errors.ecoY6NotY4;
-            }
             if (values.introEco) {
                 return I18n.Errors.introEco;
             }
             if (values.latY6) {
                 return I18n.Errors.ecoAndLatin;
             }
+            if (!values.ecoY4) {
+                return I18n.Errors.ecoY6NotY4;
+            }
             return null;
-        }
+        },
     },
     latY6: {
         type: ChoiceFieldType.BOOLEAN,

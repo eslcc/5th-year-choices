@@ -23,7 +23,7 @@ class App extends React.Component<{}, AppState> {
     render() {
         return (
             <Provider store={store}>
-                <Router>
+                <Router basename={window.location.host.indexOf('localhost') !== -1 ? '/' : '/5th-year-choices'}>
                     <div>
                         <Route path="/choice/:step" component={Stepper} />
 
