@@ -19,6 +19,7 @@ const mapStateToProps = (state: AppState): BasicsProps => ({
     values: state.choice.values
 });
 
+// tslint:disable-next-line
 class Basics extends React.Component<RouteComponentProps<any> & BasicsProps, void> {
     allValid() {
         return !(values(pick(choices, BASICS)) as ChoiceType[])
@@ -51,4 +52,5 @@ class Basics extends React.Component<RouteComponentProps<any> & BasicsProps, voi
     }
 }
 
+// tslint:disable-next-line
 export default connect(mapStateToProps)(Basics) as React.ComponentClass<RouteComponentProps<any> & BasicsProps>;

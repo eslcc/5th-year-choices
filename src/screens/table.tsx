@@ -47,4 +47,5 @@ class Table extends React.Component<TableProps, void> {
     }
 }
 
+// tslint:disable-next-line
 export default connect(mapStateToProps)(Table) as React.ComponentClass<TableProps & RouteComponentProps<any>>;
