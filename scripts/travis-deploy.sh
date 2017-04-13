@@ -8,6 +8,10 @@ fi
 
 openssl aes-256-cbc -K $encrypted_ac7688161307_key -iv $encrypted_ac7688161307_iv -in travis_deploy.enc -out travis_deploy -d
 chmod 600 travis_deploy
+
+echo "SSH key:"
+echo `ssh-keygen -lf travis_deploy`
+
 eval `ssh-agent -s`
 ssh-add travis_deploy
 
