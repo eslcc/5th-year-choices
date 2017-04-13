@@ -108,7 +108,7 @@ export interface Choice {
     error?: (choices: ChoiceValues) => I18nField | Falsey;
     /**
      * Whether the choice is <i>blocked</i> or not, that is, whether it should prevent the user from proceeding.
-     * Return the magic value 'err' to use !!error().
+     * Return the magic value 'err' to use !!error(). Default is false.
      */
     block?: (choices: ChoiceValues) => boolean | 'err';
     /**
@@ -388,7 +388,7 @@ const choices: Choices = {
         column: 3,
         periods: 4,
         error: values => values.bio2p && I18n.Errors.generic2pNot4p,
-        block: () => 'err',
+        block: () => false,
     },
     art4p: {
         type: ChoiceFieldType.BOOLEAN,
