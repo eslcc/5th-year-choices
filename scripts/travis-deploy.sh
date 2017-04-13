@@ -15,7 +15,7 @@ echo `ssh-keygen -lf travis_deploy`
 eval `ssh-agent -s`
 ssh-add travis_deploy
 
-git config user.name "Travis CI"
-git config user.email "$COMMIT_AUTHOR_EMAIL"
+git config --global user.name "Travis CI"
+git config --global user.email "travis@bots.eslcc.club"
 
 npm run deploy || exit 1
