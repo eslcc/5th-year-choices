@@ -6,7 +6,7 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" -o "$TRAVIS_BRANCH" != "$SOURCE_BRANCH" ]
     exit 0
 fi
 
-openssl aes-256-cbc -K $encrypted_517474145ba5_key -iv $encrypted_517474145ba5_iv -in travis_deploy.enc -out travis_deploy -d
+openssl aes-256-cbc -K $encrypted_ac7688161307_key -iv $encrypted_ac7688161307_iv -in travis_deploy.enc -out travis_deploy -d
 chmod 600 travis_deploy
 
 echo "SSH key:"
