@@ -1,6 +1,6 @@
 if [ "$TRAVIS_PULL_REQUEST" != "false" -o "$TRAVIS_BRANCH" != "$SOURCE_BRANCH" ]; then
     echo "Skipping deploy."
-    npm run build
+    npm run build || exit 1
     exit 0
 fi
 
@@ -18,7 +18,7 @@ cd ..
 
 rm -rf build/**/* || exit 0
 
-npm run build
+npm run build || exit 1
 
 cd out
 git config user.name "Travis CI"
